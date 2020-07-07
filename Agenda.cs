@@ -10,68 +10,50 @@ namespace Whatssapp_31
         public List<Contato> contatos;
         private const string PATH = "Database/Contatos.CSV";
 
-        public Agenda()
-        {
-
-        }
-
-        /// <summary>
-        /// Cadastra  o contato na linha do CSV
-        /// </summary>
-        /// <param name="ctt"></param>
         public void Cadastrar(Contato ctt)
         {
-            var linha = new string[] {PrepararLinha(ctt)};
-            File.AppendAllLines(PATH, linha);
+            string[] Linha = { PrepararLinhaCSV(ctt) };
+            File.AppendAllLines(PATH, Linha);
         }
 
-
-        public void Excluir(string excl)
+        public void Excluir(Contato ctt)
         {
-            List<string> linhas = new List<string>();
+             List<string> linhas = new List<string>();
 
-            using(StreamReader file = new StreamReader(PATH))
+             using(StreamReader file = new StreamReader(PATH))
             {
-                string Linha;
-                while((Linha = file.ReadLine()) != null)
+            
+                string linha;
+                while((linha = file.ReadLine()) != null)
                 {
-                    linhas.Add(Linha);
+                    linhas.Add(linha);
                 }
+            
             }
 
-            linhas.RemoveAll(l => l.Contains(excl));
-
-            ReescreverCSV(linhas);
-            
+           linhas.RemoveAll(x => x.Contains(ctt.Nome));
+           
         }
-
 
         public List<Contato> Listar()
         {
-            
-            List<Contato> lista = new List<Contato>();
-
             string[] linhas = File.ReadAllLines(PATH);
-            
-            lista = lista.OrderBy(x => x    .Nome).ToList();
-            return lista;
-        }
 
-        private string PrepararLinha(Contato c)
-        {
-            return $"Nome: {c.Nome} ; Telefone: {c.Telefone}";
-        }
-
-             
-        private void ReescreverCSV(List<string> lines)
-        {
-            using(StreamWriter output = new StreamWriter(PATH))
+            foreach(string linha in linhas)
             {
-                foreach(string ln in lines)
-                {
-                    output.Write(ln + "\n");
-                }
-            }   
+                string[] dado = linha.Split(";");
+                Contato c = new Contato(
+                dado[0],
+                dado[1]
+                );
+                contatos.Add(c);
+            }
+            contatos = contatos.OrderBy(z => z.Nome).ToList();
+            return contatos;
+        }
+
+        public string PrepararLinhaCSV(Contato ctt){
+            return $"{ctt.Nome};{ctt.Telefone}";
         }
 
     }
